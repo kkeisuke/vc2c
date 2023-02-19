@@ -12,7 +12,7 @@ export const convertWatch: ASTConverter<ts.MethodDeclaration> = (node, options) 
   if (decorator) {
     const tsModule = options.typescript
     const decoratorArguments = (decorator.expression as ts.CallExpression).arguments
-    if (decoratorArguments.length > 1) {
+    if (decoratorArguments.length) {
       const keyName = (decoratorArguments[0] as ts.StringLiteral).text
       const watchArguments = decoratorArguments[1]
       const method = tsModule.createArrowFunction(
@@ -24,11 +24,23 @@ export const convertWatch: ASTConverter<ts.MethodDeclaration> = (node, options) 
         node.body ?? tsModule.createBlock([], false)
       )
       const watchOptions: ts.PropertyAssignment[] = []
-      if (tsModule.isObjectLiteralExpression(watchArguments)) {
+      if (watchArguments && tsModule.isObjectLiteralExpression(watchArguments)) {
         watchArguments.properties.forEach((el) => {
           if (!tsModule.isPropertyAssignment(el)) return
           watchOptions.push(el)
         })
+      }
+
+      const watchFuncs: ts.Expression[] = [
+        tsModule.createPropertyAccess(
+          tsModule.createThis(),
+          createIdentifier(tsModule, keyName)
+        ),
+        method,
+      ]
+
+      if (watchOptions.length) {
+        watchFuncs.push(tsModule.createObjectLiteral(watchOptions))
       }
 
       return {
@@ -47,14 +59,7 @@ export const convertWatch: ASTConverter<ts.MethodDeclaration> = (node, options) 
               tsModule.createCall(
                 tsModule.createIdentifier('watch'),
                 undefined,
-                [
-                  tsModule.createPropertyAccess(
-                    tsModule.createThis(),
-                    createIdentifier(tsModule, keyName)
-                  ),
-                  method,
-                  tsModule.createObjectLiteral(watchOptions)
-                ]
+                watchFuncs
               ),
               node
             )
