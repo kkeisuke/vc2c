@@ -211,7 +211,8 @@ export function convertASTResultToImport (astResults: ASTResult<ts.Node>[], opti
     }
   }
 
-  if (options.compatible && importMap.has('vue')) {
+  if (options.compatible) {
+    !importMap.has('vue') && importMap.set('vue', { named: new Set() })
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const temp = importMap.get('vue')!
     temp.named.add('defineComponent')
