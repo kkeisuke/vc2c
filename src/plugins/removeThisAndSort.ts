@@ -27,6 +27,20 @@ export const removeThisAndSort: ASTTransform = (astResults, options) => {
     return contextKey.get(key)
   }
 
+  const convertCompositionAPIKey = (key: string) => {
+    const keyMap = new Map([
+      ['$router', 'router'],
+      ['$watch', 'watch'],
+      ['$store', 'store'],
+      // ['$refs', ''],
+      ['$nextTick', 'nextTick']
+    ])
+
+    return keyMap.get(key)
+  }
+
+  const IVIEW = ['$Message', '$Loading', '$Modal']
+
   let dependents: string[] = []
 
   const transformer: () => ts.TransformerFactory<ts.Node> = () => {
@@ -67,14 +81,12 @@ export const removeThisAndSort: ASTTransform = (astResults, options) => {
                 )
               }
 
-              if (propertyName === '$store') {
-                return tsModule.createIdentifier('store')
-              }
-              if (propertyName === '$router') {
-                return tsModule.createIdentifier('router')
+              const apiKey = convertCompositionAPIKey(propertyName)
+              if (apiKey) {
+                return tsModule.createIdentifier(apiKey)
               }
 
-              if (['$Message', '$Loading', '$Modal'].includes(propertyName)) {
+              if (IVIEW.includes(propertyName)) {
                 return tsModule.createPropertyAccess(
                   tsModule.createIdentifier('instance?.proxy?'),
                   tsModule.createIdentifier(propertyName)
