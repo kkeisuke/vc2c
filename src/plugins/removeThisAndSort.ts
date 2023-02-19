@@ -70,6 +70,9 @@ export const removeThisAndSort: ASTTransform = (astResults, options) => {
               if (propertyName === '$store') {
                 return tsModule.createIdentifier('store')
               }
+              if (propertyName === '$router') {
+                return tsModule.createIdentifier('router')
+              }
 
               if (['$Message', '$Loading', '$Modal'].includes(propertyName)) {
                 return tsModule.createPropertyAccess(
