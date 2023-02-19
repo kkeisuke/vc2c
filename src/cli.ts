@@ -1,6 +1,6 @@
+import glob from 'glob'
 import program from 'commander'
 import { convertFile } from './index.js'
-import inquirer from 'inquirer'
 import { writeFileInfo } from './file'
 
 function camelize (str: string) {
@@ -29,31 +29,23 @@ program
   .command('single <filePath>')
   .description('convert vue component file from class to composition api')
   .option('-v, --view', 'Output file content on stdout, and no write file.')
-  .option('-o, --output', 'Output result file path.')
   .option('-r, --root <root>', 'Set root path for calc file absolute path. Default:`process.cwd()`')
   .option('-c, --config <config>', 'Set vc2c config file path. Default: `\'.vc2c.js\'`')
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   .action(async (filePath: string, cmd) => {
     const cmdOptions = getCmdOptions(cmd)
-    if (!cmdOptions.output && !cmdOptions.view) {
-      const result = await inquirer.prompt({
-        name: 'ok',
-        type: 'confirm',
-        message: 'You aren\'t using -o option to set output file path, It will replace original file content.'
-      })
-      if (!result.ok) {
+    const targetFiles = glob.sync(filePath.includes('.vue') ? filePath : `${filePath}**/*.vue`)
+
+    targetFiles.forEach((targetFile) => {
+      const { file, result } = convertFile(targetFile, cmdOptions.root as string, cmdOptions.config as string)
+      if (cmdOptions.view) {
+        console.log(result)
         return
       }
-    }
 
-    const { file, result } = convertFile(filePath, cmdOptions.root as string, cmdOptions.config as string)
-    if (cmdOptions.view) {
-      console.log(result)
-      return
-    }
-
-    writeFileInfo(file, result)
-    console.log('Please check the TODO comments on result.')
+      writeFileInfo(file, result)
+      console.log('Please check the TODO comments on result.')
+    })
   })
 
 program.parse(process.argv)
