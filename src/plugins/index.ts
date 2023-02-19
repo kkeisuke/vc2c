@@ -211,11 +211,11 @@ export function convertASTResultToImport (astResults: ASTResult<ts.Node>[], opti
     }
   }
 
-  if (options.compatible && importMap.has('@vue/composition-api')) {
+  if (options.compatible && importMap.has('vue')) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const temp = importMap.get('@vue/composition-api')!
+    const temp = importMap.get('vue')!
     temp.named.add('defineComponent')
-    importMap.set('@vue/composition-api', temp)
+    importMap.set('vue', temp)
   }
 
   return Array.from(importMap).map((el) => {
