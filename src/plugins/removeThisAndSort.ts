@@ -30,6 +30,7 @@ export const removeThisAndSort: ASTTransform = (astResults, options) => {
   const convertCompositionAPIKey = (key: string) => {
     const keyMap = new Map([
       ['$router', 'router'],
+      ['$route', 'route'],
       ['$watch', 'watch'],
       ['$store', 'store'],
       // ['$refs', ''],
