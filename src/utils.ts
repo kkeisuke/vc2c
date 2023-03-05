@@ -47,6 +47,7 @@ const $internalHooks = new Map<string, string | false>([
   ['created', false],
   ['beforeMount', 'onBeforeMount'],
   ['mounted', 'onMounted'],
+  ['unmounted', 'onUnmounted'],
   ['beforeUnmount', 'onBeforeUnmount'],
   ['beforeDestroy', 'onBeforeUnmount'],
   ['destroyed', 'onUnmounted'],
